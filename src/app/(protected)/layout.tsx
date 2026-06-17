@@ -1,5 +1,7 @@
 import Navbar from "@/components/shared/navbar";
 
+export const dynamic = "force-dynamic";
+
 export default function ProtectedLayout({
   children,
 }: {
