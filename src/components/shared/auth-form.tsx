@@ -15,15 +15,19 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
-  const supabase = createClient();
+  function redirectToDashboard() {
+    router.refresh();
+    router.push("/dashboard");
+  }
 
   async function handleGoogleSignIn() {
     setGoogleLoading(true);
     setError(null);
+    const supabase = createClient();
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
@@ -39,9 +43,10 @@ export default function AuthForm({ mode }: AuthFormProps) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    setSuccess(null);
+    setShowSuccess(false);
     setLoading(true);
 
+    const supabase = createClient();
     try {
       if (mode === "signup") {
         const { data, error } = await supabase.auth.signUp({
@@ -56,10 +61,9 @@ export default function AuthForm({ mode }: AuthFormProps) {
           return;
         }
         if (data.session) {
-          router.refresh();
-          router.push("/dashboard");
+          redirectToDashboard();
         } else {
-          setSuccess("Check your email to confirm your account, then sign in.");
+          setShowSuccess(true);
         }
       } else {
         const { error } = await supabase.auth.signInWithPassword({
@@ -70,8 +74,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
           setError(error.message);
           return;
         }
-        router.refresh();
-        router.push("/dashboard");
+        redirectToDashboard();
       }
     } finally {
       setLoading(false);
@@ -159,9 +162,9 @@ export default function AuthForm({ mode }: AuthFormProps) {
           </div>
         )}
 
-        {success && (
+        {showSuccess && (
           <div className="rounded-md border border-primary/20 bg-accent px-3 py-2.5 text-sm text-accent-foreground">
-            {success}
+            Check your email to confirm your account, then sign in.
           </div>
         )}
 

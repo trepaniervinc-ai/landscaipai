@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LeafIcon } from "@/components/shared/leaf-icon";
 
 export default function AuthLayout({
   children,
@@ -12,14 +13,7 @@ export default function AuthLayout({
         {/* Logo */}
         <div className="p-10">
           <Link href="/" className="flex items-center gap-2.5">
-            <svg
-              className="w-7 h-7 text-primary-foreground"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              aria-hidden="true"
-            >
-              <path d="M17 8C8 10 5.9 16.17 3.82 21.34L5.71 22l1-2.3A4.49 4.49 0 0 0 8 20C19 20 22 3 22 3c-1 2-8 2-8 2C12 3 8 3 6 5c-3 3-3 7-3 7 0 0 4-4 14-4z" />
-            </svg>
+            <LeafIcon className="w-7 h-7 text-primary-foreground" />
             <span className="text-xl font-bold text-primary-foreground tracking-tight">
               Landscaip
             </span>
@@ -66,9 +60,7 @@ export default function AuthLayout({
           className="absolute -bottom-12 -right-12 w-80 h-80 text-primary-foreground/10 pointer-events-none"
           aria-hidden="true"
         >
-          <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
-            <path d="M17 8C8 10 5.9 16.17 3.82 21.34L5.71 22l1-2.3A4.49 4.49 0 0 0 8 20C19 20 22 3 22 3c-1 2-8 2-8 2C12 3 8 3 6 5c-3 3-3 7-3 7 0 0 4-4 14-4z" />
-          </svg>
+          <LeafIcon className="w-full h-full" />
         </div>
       </div>
 
@@ -77,14 +69,7 @@ export default function AuthLayout({
         {/* Mobile logo bar */}
         <header className="lg:hidden h-16 border-b border-border flex items-center px-6">
           <Link href="/" className="flex items-center gap-2">
-            <svg
-              className="w-5 h-5 text-primary"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              aria-hidden="true"
-            >
-              <path d="M17 8C8 10 5.9 16.17 3.82 21.34L5.71 22l1-2.3A4.49 4.49 0 0 0 8 20C19 20 22 3 22 3c-1 2-8 2-8 2C12 3 8 3 6 5c-3 3-3 7-3 7 0 0 4-4 14-4z" />
-            </svg>
+            <LeafIcon className="w-5 h-5 text-primary" />
             <span className="font-bold text-lg text-primary">Landscaip</span>
           </Link>
         </header>

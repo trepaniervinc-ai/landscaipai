@@ -3,6 +3,9 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getAuthenticatedProfile } from "@/lib/supabase/queries";
 import { createClient } from "@/lib/supabase/server";
+import { LeafIcon } from "@/components/shared/leaf-icon";
+import { CreditsBadge } from "@/components/shared/credits-badge";
+import { formatDate } from "@/lib/utils";
 import type { Project } from "@/types";
 
 export const metadata: Metadata = { title: "Dashboard — Landscaip" };
@@ -21,7 +24,7 @@ export default async function DashboardPage() {
   const supabase = await createClient();
   const { data: projects } = await supabase
     .from("projects")
-    .select("*")
+    .select("id, name, updated_at, is_shared")
     .order("updated_at", { ascending: false });
 
   const firstName = profile.full_name?.split(" ")[0] ?? "there";
@@ -37,12 +40,7 @@ export default async function DashboardPage() {
           </h1>
         </div>
         <div className="flex items-center gap-3">
-          <span className="hidden sm:flex items-center gap-1.5 bg-accent text-accent-foreground text-xs font-semibold px-3 py-1.5 rounded-full">
-            <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-            </svg>
-            {profile.credits_balance} {profile.credits_balance === 1 ? "credit" : "credits"}
-          </span>
+          <CreditsBadge credits={profile.credits_balance} className="hidden sm:flex" />
           <Link
             href="/generate"
             className="inline-flex items-center gap-1.5 h-9 px-4 bg-primary text-primary-foreground text-sm font-medium rounded-md hover:bg-primary/90 transition-colors"
@@ -56,17 +54,10 @@ export default async function DashboardPage() {
       </div>
 
       {/* Content */}
-      {!projects || projects.length === 0 ? (
+      {!projects?.length ? (
         <div className="flex flex-col items-center justify-center py-24 text-center">
           <div className="w-16 h-16 rounded-xl bg-muted flex items-center justify-center mb-5">
-            <svg
-              className="w-8 h-8 text-muted-foreground"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              aria-hidden="true"
-            >
-              <path d="M17 8C8 10 5.9 16.17 3.82 21.34L5.71 22l1-2.3A4.49 4.49 0 0 0 8 20C19 20 22 3 22 3c-1 2-8 2-8 2C12 3 8 3 6 5c-3 3-3 7-3 7 0 0 4-4 14-4z" />
-            </svg>
+            <LeafIcon className="w-8 h-8 text-muted-foreground" />
           </div>
           <h2 className="text-lg font-semibold text-foreground mb-2">
             Your first design awaits
@@ -83,21 +74,14 @@ export default async function DashboardPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {projects.map((project: Project) => (
+          {projects.map((project: Pick<Project, "id" | "name" | "updated_at" | "is_shared">) => (
             <Link
               key={project.id}
               href={`/project/${project.id}`}
               className="group block bg-card border border-border rounded-lg overflow-hidden hover:border-primary/30 hover:shadow-md transition-all"
             >
               <div className="aspect-video bg-muted flex items-center justify-center">
-                <svg
-                  className="w-8 h-8 text-muted-foreground/30"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path d="M17 8C8 10 5.9 16.17 3.82 21.34L5.71 22l1-2.3A4.49 4.49 0 0 0 8 20C19 20 22 3 22 3c-1 2-8 2-8 2C12 3 8 3 6 5c-3 3-3 7-3 7 0 0 4-4 14-4z" />
-                </svg>
+                <LeafIcon className="w-8 h-8 text-muted-foreground/30" />
               </div>
               <div className="p-4">
                 <h3 className="font-medium text-foreground text-sm group-hover:text-primary transition-colors truncate">
@@ -105,10 +89,7 @@ export default async function DashboardPage() {
                 </h3>
                 <div className="flex items-center justify-between mt-1.5">
                   <p className="text-xs text-muted-foreground">
-                    {new Date(project.updated_at).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                    })}
+                    {formatDate(project.updated_at)}
                   </p>
                   {project.is_shared && (
                     <span className="text-xs text-accent-foreground bg-accent px-2 py-0.5 rounded-full">
