@@ -33,7 +33,9 @@
       "mcp__supabase__execute_sql",
       "Bash(npx tsc *)",
       "Skill(code-review)",
-      "mcp__context7__query-docs"
+      "mcp__context7__query-docs",
+      "mcp__vercel__list_deployments",
+      "mcp__vercel__get_project"
     ]
   }
 }

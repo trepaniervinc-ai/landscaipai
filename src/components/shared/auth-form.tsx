@@ -18,6 +18,9 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const [showSuccess, setShowSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [unconfirmed, setUnconfirmed] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [resent, setResent] = useState(false);
 
   function redirectToDashboard() {
     router.refresh();
@@ -44,6 +47,8 @@ export default function AuthForm({ mode }: AuthFormProps) {
     e.preventDefault();
     setError(null);
     setShowSuccess(false);
+    setUnconfirmed(false);
+    setResent(false);
     setLoading(true);
 
     const supabase = createClient();
@@ -72,6 +77,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
         });
         if (error) {
           setError(error.message);
+          if (error.code === "email_not_confirmed") setUnconfirmed(true);
           return;
         }
         redirectToDashboard();
@@ -79,6 +85,14 @@ export default function AuthForm({ mode }: AuthFormProps) {
     } finally {
       setLoading(false);
     }
+  }
+
+  async function handleResendVerification() {
+    setResending(true);
+    const supabase = createClient();
+    const { error } = await supabase.auth.resend({ type: "signup", email });
+    if (!error) setResent(true);
+    setResending(false);
   }
 
   const inputClass =
@@ -140,9 +154,16 @@ export default function AuthForm({ mode }: AuthFormProps) {
         </div>
 
         <div className="space-y-1.5">
-          <label htmlFor="password" className="text-sm font-medium text-foreground">
-            Password
-          </label>
+          <div className="flex items-center justify-between">
+            <label htmlFor="password" className="text-sm font-medium text-foreground">
+              Password
+            </label>
+            {mode === "login" && (
+              <Link href="/forgot-password" className="text-sm text-primary hover:underline">
+                Forgot password?
+              </Link>
+            )}
+          </div>
           <input
             id="password"
             type="password"
@@ -157,8 +178,22 @@ export default function AuthForm({ mode }: AuthFormProps) {
         </div>
 
         {error && (
-          <div className="rounded-md border border-destructive/20 bg-destructive/10 px-3 py-2.5 text-sm text-destructive">
-            {error}
+          <div className="rounded-md border border-destructive/20 bg-destructive/10 px-3 py-2.5 text-sm text-destructive space-y-1.5">
+            <p>{error}</p>
+            {mode === "login" && unconfirmed && (
+              <button
+                type="button"
+                onClick={handleResendVerification}
+                disabled={resending || resent}
+                className="text-sm font-medium text-destructive underline hover:no-underline disabled:opacity-60"
+              >
+                {resent
+                  ? "Verification email sent."
+                  : resending
+                    ? "Sending…"
+                    : "Resend verification email"}
+              </button>
+            )}
           </div>
         )}
 

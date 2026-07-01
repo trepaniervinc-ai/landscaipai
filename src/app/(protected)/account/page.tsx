@@ -2,12 +2,24 @@ import type { Metadata } from "next";
 import { getAuthenticatedProfile } from "@/lib/supabase/queries";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate } from "@/lib/utils";
+import ChangePasswordForm from "@/components/account/change-password-form";
+import ChangeEmailForm from "@/components/account/change-email-form";
+import SignOutOthersButton from "@/components/account/sign-out-others-button";
+import ResendVerificationBanner from "@/components/account/resend-verification-banner";
+import DeleteAccountSection from "@/components/account/delete-account-section";
 
 export const metadata: Metadata = { title: "Account" };
 
 export default async function AccountPage() {
   const profile = await getAuthenticatedProfile();
   const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const hasPassword = user?.identities?.some((i) => i.provider === "email") ?? false;
+  const emailConfirmed = !!user?.email_confirmed_at;
+  const pendingEmail = user?.new_email ?? null;
 
   const { data: subscription } = await supabase
     .from("subscriptions")
@@ -26,6 +38,10 @@ export default async function AccountPage() {
   return (
     <div className="max-w-2xl">
       <h1 className="text-2xl font-bold text-foreground mb-8">Account</h1>
+
+      {!emailConfirmed && profile?.email && (
+        <ResendVerificationBanner email={profile.email} />
+      )}
 
       {/* Profile */}
       <section className="bg-card border border-border rounded-lg p-6 mb-6">
@@ -54,6 +70,14 @@ export default async function AccountPage() {
             </span>
           </div>
         </div>
+      </section>
+
+      {/* Security */}
+      <section className="bg-card border border-border rounded-lg p-6 mb-6 space-y-6">
+        <h2 className="font-semibold text-foreground">Security</h2>
+        <ChangePasswordForm hasPassword={hasPassword} />
+        <ChangeEmailForm currentEmail={profile!.email} pendingEmail={pendingEmail} />
+        <SignOutOthersButton />
       </section>
 
       {/* Subscription */}
@@ -120,6 +144,10 @@ export default async function AccountPage() {
           </div>
         )}
       </section>
+
+      <div className="mt-6">
+        <DeleteAccountSection currentEmail={profile!.email} />
+      </div>
     </div>
   );
 }

@@ -45,11 +45,14 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/project") ||
     pathname.startsWith("/generate") ||
-    pathname.startsWith("/account");
+    pathname.startsWith("/account") ||
+    pathname.startsWith("/reset-password");
 
   const isAdminRoute = pathname.startsWith("/admin");
   const isAuthRoute =
-    pathname.startsWith("/login") || pathname.startsWith("/signup");
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/signup") ||
+    pathname.startsWith("/forgot-password");
 
   // Unauthenticated → redirect to login
   if ((isProtectedRoute || isAdminRoute) && !user) {
